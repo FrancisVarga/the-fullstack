@@ -9,13 +9,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    ports:
-      - 6379:6379
-    expose:
-      - 6379
 
   postgres:
-    image: postgres:latest
+    image: postgres
     restart: always
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
@@ -28,38 +24,38 @@ services:
       - POSTGRES_NON_ROOT_PASSWORD
     ports:
       - 5432:5432
-    networks:
-      - internalnet
     expose:
       - 5432
+    networks:
+      - internalnet
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      test: ['CMD-SHELL', 'pg_isready -h localhost -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 10s
       timeout: 5s
       retries: 5
 
-  # mongodb:
-  #   image: mongo
-  #   volumes:
-  #     - ./mongodb_data:/data/db
-  #   environment:
-  #     - MONGO_INITDB_ROOT_USERNAME=admin
-  #     - MONGO_INITDB_ROOT_PASSWORD=admin
-  #   ports:
-  #     - 27017:27017
-  #   expose:
-  #     - 27017
-  #   networks:
-  #     - internalnet
+  mongodb:
+    image: mongo
+    volumes:
+      - ./mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    ports:
+      - 27017:27017
+    expose:
+      - 27017
+    networks:
+      - internalnet
 
-  # tooljet:
-  #   image: tooljet/try:latest
-  #   volumes:
-  #     - tooljet-data:/var/lib/postgresql/13/main
-  #   ports:
-  #     - 9080:80
-  #   networks:
-  #     - internalnet
+  tooljet:
+    image: tooljet/try:latest
+    volumes:
+      - tooljet-data:/var/lib/postgresql/13/main
+    ports:
+      - 9080:80
+    networks:
+      - internalnet
 
   # percona:
   #   image: percona
@@ -168,16 +164,18 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    dns:
-      - 8.8.8.8
-      - 192.168.1.1
+
+  nocodb:
+    image: nocodb/nocodb
+    volumes:
+      - ./nocodb_data:/usr/src/app/data
+    ports:
+      - 18080:8080
     networks:
       - internalnet
 
 networks:
   internalnet:
-    driver: bridge
 
 volumes:
   tooljet-data:
-  rabbitmq_data:
