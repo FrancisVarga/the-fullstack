@@ -37,7 +37,8 @@ Each service has its own dedicated data volume for persistence.
 
 Stopping the Project
 To stop all services, run the following command in the root directory of the project:
-```ssh
+
+```sh
 docker-compose down
 ```
 
