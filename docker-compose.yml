@@ -154,7 +154,7 @@ services:
     expose:
       - 8484
     environment:
-      - OPENAI_API_KEY=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
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GRIST_TELEMETRY_LEVEL=off
       - GRIST_BOOT_KEY=secret
       - PYTHON_VERSION=3
