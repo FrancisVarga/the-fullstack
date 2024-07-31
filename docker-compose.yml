@@ -3,7 +3,7 @@ services:
   metabase:
     image: metabase/metabase
     volumes:
-      - ./metabase_data:/metabase-data
+      - metabase_data:/metabase-data
     ports:
       - 3000:3000
     networks:
@@ -13,12 +13,14 @@ services:
     image: redis:latest
     restart: always
     volumes:
-      - ./redis_data:/data
+      - redis_data:/data
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 5s
       retries: 10
+    ports:
+      - 6379:6379
 
   postgres:
     image: postgres:latest
@@ -33,11 +35,11 @@ services:
       - POSTGRES_NON_ROOT_USER
       - POSTGRES_NON_ROOT_PASSWORD
     ports:
-      - 5432:5432
+      - 15432:5432
     networks:
       - internalnet
     expose:
-      - 5432
+      - 15432
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -67,18 +69,18 @@ services:
   #   networks:
   #     - internalnet
 
-  # percona:
-  #   image: percona
-  #   volumes:
-  #     - ./percona_data:/var/lib/mysql
-  #   environment:
-  #     - MYSQL_ROOT_PASSWORD=root
-  #   ports:
-  #     - 3306:3306
-  #   expose:
-  #     - 3306
-  #   networks:
-  #     - internalnet
+  percona:
+    image: percona
+    volumes:
+      - percona_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - 13306:3306
+    expose:
+      - 13306
+    networks:
+      - internalnet
 
   # mssql:
   #   image: mcr.microsoft.com/mssql/server
@@ -153,7 +155,7 @@ services:
       dockerfile: custom-builds/grist/Dockerfile
     restart: always
     volumes:
-      - ./grist_data:/data
+      - grist_data:/data
     command: ""
     ports:
       - 8484:8484
@@ -187,3 +189,8 @@ networks:
 volumes:
   tooljet-data:
   rabbitmq_data:
+  grist_data:
+  mongodb_data:
+  metabase_data:
+  percona_data:
+  redis_data:
