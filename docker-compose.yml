@@ -1,4 +1,14 @@
 services:
+
+  metabase:
+    image: metabase/metabase
+    volumes:
+      - ./metabase_data:/metabase-data
+    ports:
+      - 3000:3000
+    networks:
+      - internalnet
+  
   redis:
     image: redis:latest
     restart: always
@@ -9,6 +19,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - internalnet
 
   postgres:
     image: postgres
