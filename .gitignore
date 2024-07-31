@@ -6,3 +6,6 @@ postgres_data
 redis_data
 percona_data
 redis_data
+rabbitmq_data
+grist_data
+.env
