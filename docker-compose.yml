@@ -3,7 +3,7 @@ services:
     image: redis:latest
     restart: always
     volumes:
-      - ./redis_data:/data
+      - redis_data:/data
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
@@ -13,6 +13,8 @@ services:
       - 6379:6379
     expose:
       - 6379
+    networks:
+      - internalnet
 
   postgres:
     image: postgres:latest
@@ -38,24 +40,24 @@ services:
       timeout: 5s
       retries: 5
 
-  # mongodb:
-  #   image: mongo
-  #   volumes:
-  #     - ./mongodb_data:/data/db
-  #   environment:
-  #     - MONGO_INITDB_ROOT_USERNAME=admin
-  #     - MONGO_INITDB_ROOT_PASSWORD=admin
-  #   ports:
-  #     - 27017:27017
-  #   expose:
-  #     - 27017
-  #   networks:
-  #     - internalnet
+  mongodb:
+    image: mongo
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    ports:
+      - 27017:27017
+    expose:
+      - 27017
+    networks:
+      - internalnet
 
   # tooljet:
   #   image: tooljet/try:latest
   #   volumes:
-  #     - tooljet-data:/var/lib/postgresql/13/main
+  #     - tooljet:/var/lib/postgresql/13/main
   #   ports:
   #     - 9080:80
   #   networks:
@@ -132,14 +134,14 @@ services:
       - "com.rabbitmq.server.add_user_tags=username administrator"
       - "com.rabbitmq.server.set_permissions=username \".*\" \".*\" \".*\""
 
-  # nocodb:
-  #   image: nocodb/nocodb
-  #   volumes:
-  #     - ./nocodb_data:/usr/src/app/data
-  #   ports:
-  #     - 8080:8080
-  #   networks:
-  #     - internalnet
+  nocodb:
+    image: nocodb/nocodb
+    volumes:
+      - nocodb_data:/usr/src/app/data
+    ports:
+      - 8080:8080
+    networks:
+      - internalnet
 
   grist-core:
     build: 
@@ -147,8 +149,7 @@ services:
       dockerfile: custom-builds/grist/Dockerfile
     restart: always
     volumes:
-      - ./grist_data:/data
-    command: ""
+      - grist_data:/data
     ports:
       - 8484:8484
     expose:
@@ -157,6 +158,7 @@ services:
       - OPENAI_API_KEY={OPENAI_API_KEY}
       - GRIST_TELEMETRY_LEVEL=off
       - GRIST_BOOT_KEY=secret
+      - GRIST_SERVERS=home,docs,static,app
       - PYTHON_VERSION=3
       - ASSISTANT_MODEL=gpt-4
       - TYPEORM_DATABASE=grist
@@ -165,19 +167,23 @@ services:
       - TYPEORM_PORT=5432
       - TYPEORM_USERNAME=${POSTGRES_USER}
       - TYPEORM_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_URL=redis://redis
     depends_on:
       postgres:
         condition: service_healthy
-    dns:
-      - 8.8.8.8
-      - 192.168.1.1
+      redis:
+        condition: service_healthy
     networks:
       - internalnet
-
+  
 networks:
   internalnet:
-    driver: bridge
 
 volumes:
   tooljet-data:
   rabbitmq_data:
+  mongodb_data:
+  grist_data:
+  redis_data:
+  nocodb_data:
+  tooljet:
