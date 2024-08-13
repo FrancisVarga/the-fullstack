@@ -149,43 +149,49 @@ services:
     networks:
       - internalnet
 
-  grist-core:
-    build: 
-      context: .
-      dockerfile: custom-builds/grist/Dockerfile
-    restart: always
+  # grist-core:
+  #   build: 
+  #     context: .
+  #     dockerfile: custom-builds/grist/Dockerfile
+  #   restart: always
+  #   volumes:
+  #     - grist_data:/data
+  #   command: ""
+  #   ports:
+  #     - 8484:8484
+  #   expose:
+  #     - 8484
+  #   environment:
+  #     - OPENAI_API_KEY={OPENAI_API_KEY}
+  #     - GRIST_TELEMETRY_LEVEL=off
+  #     - GRIST_BOOT_KEY=secret
+  #     - GRIST_SERVERS=home,docs,static,app
+  #     - PYTHON_VERSION=3
+  #     - ASSISTANT_MODEL=gpt-4
+  #     - TYPEORM_DATABASE=grist
+  #     - TYPEORM_HOST=postgres
+  #     - TYPEORM_TYPE=postgres
+  #     - TYPEORM_PORT=5432
+  #     - TYPEORM_USERNAME=${POSTGRES_USER}
+  #     - TYPEORM_PASSWORD=${POSTGRES_PASSWORD}
+  #     - REDIS_URL=redis://redis
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   networks:
+  #     - internalnet
+
+  minio:
+    image: minio/minio
     volumes:
-      - grist_data:/data
-    command: ""
+      - minio_data:/data
     ports:
-      - 8484:8484
-    expose:
-      - 8484
-    environment:
-      - OPENAI_API_KEY={OPENAI_API_KEY}
-      - GRIST_TELEMETRY_LEVEL=off
-      - GRIST_BOOT_KEY=secret
-      - GRIST_SERVERS=home,docs,static,app
-      - PYTHON_VERSION=3
-      - ASSISTANT_MODEL=gpt-4
-      - TYPEORM_DATABASE=grist
-      - TYPEORM_HOST=postgres
-      - TYPEORM_TYPE=postgres
-      - TYPEORM_PORT=5432
-      - TYPEORM_USERNAME=${POSTGRES_USER}
-      - TYPEORM_PASSWORD=${POSTGRES_PASSWORD}
-      - REDIS_URL=redis://redis
-    depends_on:
-      postgres:
-        condition: service_healthy
+      - 9000:9000
     networks:
       - internalnet
-  
-networks:
-  internalnet:
 
 volumes:
-  tooljet-data:
+  minio_data:
   rabbitmq_data:
   grist_data:
   mongodb_data:
